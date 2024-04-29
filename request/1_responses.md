@@ -106,6 +106,21 @@ select rate from consultations where rate > 70;
 16. Sélectionnez le medecins avec le plus gros chiffre d'affaire :
     
 ```sql
-select max(rate) from consultations;
+SELECT 
+    doctor_id,
+    CONCAT(first_name, ' ', last_name) AS doctor_name,
+    MAX(total_revenue)
+FROM (
+SELECT 
+     d.id AS doctor_id,
+        d.first_name,
+        d.last_name,
+        SUM(c.rate) AS total_revenue
+    FROM doctors d 
+    JOIN consultations c on d.id = c.doctor_id
+	GROUP BY d.id
+)     as doctors_revenues
+WHERE total_revenue = ( SELECT MAX(total_revenue) FROM (SELECT SUM(rate) AS total_revenue FROM consultations GROUP BY doctor_id) AS total_revenues)
+GROUP BY doctor_id;
 ```
 
